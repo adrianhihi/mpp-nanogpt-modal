@@ -4,6 +4,7 @@ Run multiple quick-only experiments in parallel batches.
 Usage: python3 batch.py
 """
 import subprocess, sys, time, threading, json
+from helix.client import helix_status
 
 EXPERIMENTS = [
     # LR sweep
@@ -65,6 +66,7 @@ def run_one(exp):
 
 
 def main():
+    helix_status()  # show Helix sidecar status at startup
     print(f"Running {len(EXPERIMENTS)} experiments in batches of {BATCH_SIZE} on {GPU}\n")
 
     for batch_start in range(0, len(EXPERIMENTS), BATCH_SIZE):

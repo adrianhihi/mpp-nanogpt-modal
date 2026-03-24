@@ -102,6 +102,47 @@ run.py                              Modal (via MPP)
 - **[Tempo](https://tempo.xyz)** — Infrastructure for machine payments
 - **[Modal](https://modal.com)** — Serverless GPU compute
 
+## Self-Healing Payments (Helix Integration)
+
+This fork adds [Helix](https://github.com/adrianhihi/helix) self-healing for MPP payment failures. Helix wraps payment calls with PCEC (Perceive → Construct → Evaluate → Commit) to automatically diagnose and repair failures.
+
+### What it fixes
+
+| Problem | Location | Helix Repair |
+|---------|----------|-------------|
+| Session expiry kills silently | run.py:153 | Auto-renew session |
+| Undifferentiated retry | run.py:28 | Strategy-specific repair |
+| No budget isolation | batch.py:55 | Cost-capped execution |
+| FULL phase can waste $1.50 | research.py:141 | Early termination |
+
+### Setup
+
+```bash
+# 1. Install Helix sidecar
+npm install -g @helix-agent/core
+
+# 2. Start sidecar (in a separate terminal)
+bash helix/start.sh
+
+# 3. Run experiments as normal — Helix intercepts failures
+python run.py
+```
+
+### How it works
+
+```python
+# Before: bare payment call (fails silently)
+result = tempo("/sandbox/create", data)
+
+# After: self-healing (auto-diagnoses + repairs)
+from helix.client import helix_wrap
+result = helix_wrap(lambda: tempo("/sandbox/create", data))
+```
+
+Helix runs as a sidecar process. No code changes to MPP itself. All repairs happen at runtime — parameter correction, state refresh, retry with corrected inputs.
+
+Gene Map learns from every repair. Second occurrence of the same error type → IMMUNE response in <1ms.
+
 ## License
 
 MIT
