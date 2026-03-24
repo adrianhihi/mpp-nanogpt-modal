@@ -13,7 +13,7 @@ tempo add request
 tempo wallet login
 
 # 2. Train a GPT on Shakespeare, paid with stablecoins
-python3 run.py
+modal run run.py
 ```
 
 ## Output
@@ -125,7 +125,7 @@ npm install -g @helix-agent/core
 bash helix/start.sh
 
 # 3. Run experiments as normal — Helix intercepts failures
-python run.py
+modal run run.py
 ```
 
 ### How it works
